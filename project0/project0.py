@@ -13,10 +13,12 @@ class RoadNetwork:
         self.adjList[locId2]["roads"].append({"name": name, "destId": locId1, "speedLimit": speedLimit})
 
     def create_graph(self, fileName):
-
-        #open file
-        f = open(fileName)
-        lines = f.readlines()
+        try:
+            f = open(fileName)
+            lines = f.readlines()
+        except IOError as e:  
+            print("Invalid file name! Try again.")
+            raise e
 
         #read through file line by line
         for l in lines:
@@ -33,7 +35,7 @@ class RoadNetwork:
         if locId in self.adjList.keys():
             print("Location " + locId + " has edges leading to:")
             for road in self.adjList[locId]["roads"]:
-                print(road["destId"] + " " + road["speedLimit"] + " mph " + road["name"])
+                print('\t' + road["destId"] + " - " + road["speedLimit"] + " mph - " + road["name"])
         else:
             print("Invalid location ID.")
     
