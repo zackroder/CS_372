@@ -35,7 +35,7 @@ class RoadNetwork:
         if locId in self.adjList.keys():
             print("Location " + locId + " has edges leading to:")
             for road in self.adjList[locId]["roads"]:
-                print('\t' + road["destId"] + " - " + road["speedLimit"] + " mph - " + road["name"])
+                print('\t' + road["destId"] + " " + road["speedLimit"] + " mph " + road["name"])
         else:
             print("Invalid location ID.")
     
