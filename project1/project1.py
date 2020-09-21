@@ -17,7 +17,7 @@ class RoadNetwork:
 
     def AddLocation(self, locId, longitude, latitude):
         if locId not in self.adjList:
-            self.adjList[locId] = {"longitude": longitude, "latitude": latitude, "roads": []}
+            self.adjList[locId] = {"longitude": float(longitude), "latitude": float(latitude), "roads": []}
     
     def AddRoad(self, locId1, locId2, speedLimit, name):
         #append dict object with road info (destId, name, speed limit)
@@ -53,11 +53,11 @@ class RoadNetwork:
     
     #compute distance using spherical coordinates
     def distBetweenTwoLocationsInMiles(self, loc1Id, loc2Id):
-        lat1 = self.adjList["loc1Id"]["latitude"]
-        lat2 = self.adjList["loc2Id"]["latitude"]
+        lat1 = self.adjList[loc1Id]["latitude"]
+        lat2 = self.adjList[loc2Id]["latitude"]
 
-        long1 = self.adjList["loc1Id"]["longitude"]
-        long2 = self.adjList["loc2Id"]["longitude"]
+        long1 = self.adjList[loc1Id]["longitude"]
+        long2 = self.adjList[loc2Id]["longitude"]
 
         degreesToRadians = math.pi/180.0
 
@@ -79,47 +79,98 @@ class RoadNetwork:
         distance = self.distBetweenTwoLocationsInMiles(nodeNId, goalNodeId)
         return (distance / 65.0)
 
+    def reconstructuPath(self, cameFrom, current):
+        path = []
+
+        while current in cameFrom.keys():
+            current = cameFrom[current]
+            path.insert(0, current)
+        
+        return path 
     def findBestPathByAStar(self, startId, goalId):
         frontier = PQueue()
+        if DEBUG:
+            print("Routing from " + startId + " to " + goalId)
+
+        #dictionaries to keep track of path costs as we proceed!
+        #for locId n, cameFrom[n] is location Id immediately
+        #proceeding it on cheapest path from startId
+        cameFrom = {}
+        #for locId n, gScore[n] returns currently known cheapest g path
+        gScore = {}
+        #for locId n, hScore[n] returns currently known cheapest h path
+        hScore = {}
+
         #enqueue start node
         frontier.enqueue(startId, 0)
 
+        hScore[startId] = self.heuristicFunction(startId, goalId)
+        gScore[startId] = 0.0
         while not frontier.empty():
             #get item off queue  
             currLocId = frontier.dequeue()
+            #retrieve g and h values
+            g = gScore[currLocId]
+            h = hScore[currLocId]
+            f = g+h
             if DEBUG:
                 print("Location " + currLocId + " popped off frontier.")
                 print("\t g = ", g)
                 print("\t h = ", h)
                 print("\t f = ", f)
 
-            if currLocId = goalId:
-                break
+            #we found it!
+            if currLocId == goalId:
+                #reconstruct path and return it
+                return self.reconstructuPath(cameFrom, currLocId)
 
             #loop through accessible roads and evaluate each one then add to priority queue
-            for road in self.adjList[currLocId]:
+            for road in self.adjList[currLocId]["roads"]:
                 destId = road["destId"]
                 speedLimit = float(road["speedLimit"])
 
                 #f(n) = g(n) + h(n)
-                g = self.distBetweenTwoLocationsInMiles(currLocId, destId) / speedLimit
-                h = heuristicFunction(currLocId, goalId)
-                f = g + h
+
+                #straight line distance is equal to length of the road, since we assume only line segment roads
+                gTemp = gScore[currLocId] + (self.distBetweenTwoLocationsInMiles(currLocId, destId) / speedLimit)
+                hTemp = self.heuristicFunction(currLocId, goalId)
+                fTemp = g + h
 
 
                 if not frontier.contains(destId):
                     #add it to frontier if it isnt already there
-                    frontier.enqueue(destId, estSolCost)
+                    frontier.enqueue(destId, fTemp)
+                    
+                    #add to cameFrom
+                    cameFrom[destId] = currLocId
+
+                    #store g and h values for future lookup
+                    gScores[destId] = gTemp
+                    hScores[destId] = hTemp
                     if DEBUG:
                         print("Location " + destId + " added to frontier.")
-                        print("\t g = ", g)
-                        print("\t h = ", h)
-                        print("\t f = ", f)
-                elif frontier.contains(destId) and estSolCost < frontier.get_priority(destId):
+                        print("\t g = ", gTemp)
+                        print("\t h = ", hTemp)
+                        print("\t f = ", fTemp)
+                elif frontier.contains(destId) and estSolCost < frontier.get_priority(fTemp):
                     #if it is already in the frontier but new cost is lower, update the frontier
-                    frontier.change_priority(destId, estSolCost)
+                    frontier.change_priority(destId, fTemp)
+                    if DEBUG:
+                        print("Location " + destId + " priority updated.")
+                        print("==Old costs==")
+                        print("\t g = ", gScore[destId])
+                        print("\t h =", hScore[destId])
+                        print("\t f = ", gScore[destId] + hScore[destId])
+                        print("==Updated Costs==")
+                        print("\t g = ", gTemp)
+                        print("\t h =", hTemp)
+                        print("\t f = ", fTemp)
+                    #store updated and h values for future lookup
+                    gScore[destId] = gTemp
+                    hScore[destId] = hTemp
 
-
+                    #better path found; update cameFrom
+                    cameFrom[destId] = currLocId
 
 
     def printAdjList(self):
@@ -127,16 +178,17 @@ class RoadNetwork:
 
 
 def main():
-    fileName = raw_input("Input filename (.txt): ")
+    fileName = input("Input filename (.txt): ")
 
     network = RoadNetwork()
 
     network.create_graph(fileName)
 
-    locId = input("Enter a location ID (or 0 to quit): ")
-    while (locId != 0):
-        network.PrintAdjLocations(locId)
-        locId = input("Enter a location ID (or 0 to quit): ")
+    locId1 = input("Enter one location ID: ")
+    locId2 = input("Enter another location ID: ")
+    
+    path = network.findBestPathByAStar(locId1, locId2)
+    print(path)
 
 
 
