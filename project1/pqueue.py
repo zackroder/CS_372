@@ -135,13 +135,3 @@ class Point3:  # note this class only compares x & y for equality
 
     def __repr__(self):
         return self.__str__()
-
-
-def main():
-    q = PQueue()
-    q.enqueue(("test", 1, "fuck", False), 3)
-
-    x = q.dequeue()
-    print(x)
-
-main()

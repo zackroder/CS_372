@@ -72,19 +72,20 @@ class RoadNetwork:
         arc = math.acos(cos)
 
         #multiply by radius of earth in miles to get mile distance
-        return arc*3960.0
+        return (arc*3960.0)
 
-    #heuristic for A* search is time for straight-line travel time from n to goal state, driving at 65mph
+    #heuristic for A* search is time for straight-line travel time in minutes from n to goal state, driving at 65mph
     def heuristicFunction(self, nodeNId, goalNodeId):
         distance = self.distBetweenTwoLocationsInMiles(nodeNId, goalNodeId)
-        return (distance / 65.0)
+        return ((distance / 65.0) * 60.0)
 
-    def reconstructuPath(self, cameFrom, current):
+    def reconstructPath(self, cameFrom, current, startId):
         path = []
 
-        while current in cameFrom.keys():
+        while current != startId:
             current = cameFrom[current]
             path.insert(0, current)
+        
         
         return path 
     def findBestPathByAStar(self, startId, goalId):
@@ -101,6 +102,9 @@ class RoadNetwork:
         #for locId n, hScore[n] returns currently known cheapest h path
         hScore = {}
 
+        #keep track of explored locations
+        explored = []
+
         #enqueue start node
         frontier.enqueue(startId, 0)
 
@@ -114,15 +118,12 @@ class RoadNetwork:
             h = hScore[currLocId]
             f = g+h
             if DEBUG:
-                print("Location " + currLocId + " popped off frontier.")
-                print("\t g = ", g)
-                print("\t h = ", h)
-                print("\t f = ", f)
+                print("Visiting location " + currLocId + ". g = " + str(g) + ", h = " + str(h) + ", f = " +str(f))
 
             #we found it!
             if currLocId == goalId:
                 #reconstruct path and return it
-                return self.reconstructuPath(cameFrom, currLocId)
+                return self.reconstructPath(cameFrom, currLocId, startId)
 
             #loop through accessible roads and evaluate each one then add to priority queue
             for road in self.adjList[currLocId]["roads"]:
@@ -132,12 +133,12 @@ class RoadNetwork:
                 #f(n) = g(n) + h(n)
 
                 #straight line distance is equal to length of the road, since we assume only line segment roads
-                gTemp = gScore[currLocId] + (self.distBetweenTwoLocationsInMiles(currLocId, destId) / speedLimit)
+                gTemp = gScore[currLocId] + 60.0*(self.distBetweenTwoLocationsInMiles(currLocId, destId) / speedLimit)
                 hTemp = self.heuristicFunction(currLocId, goalId)
-                fTemp = g + h
+                fTemp = gTemp + hTemp
 
 
-                if not frontier.contains(destId):
+                if not frontier.contains(destId) and destId not in explored:
                     #add it to frontier if it isnt already there
                     frontier.enqueue(destId, fTemp)
                     
@@ -145,48 +146,45 @@ class RoadNetwork:
                     cameFrom[destId] = currLocId
 
                     #store g and h values for future lookup
-                    gScores[destId] = gTemp
-                    hScores[destId] = hTemp
+                    gScore[destId] = gTemp
+                    hScore[destId] = hTemp
                     if DEBUG:
-                        print("Location " + destId + " added to frontier.")
-                        print("\t g = ", gTemp)
-                        print("\t h = ", hTemp)
-                        print("\t f = ", fTemp)
-                elif frontier.contains(destId) and estSolCost < frontier.get_priority(fTemp):
+                        print("\t Location " + destId + " added to frontier. g = " + str(gTemp) + ", h = " 
+                        + str(hTemp) + ", f = " + str(fTemp))
+                elif frontier.contains(destId) and fTemp < (gScore[destId] + hScore[destId]):
                     #if it is already in the frontier but new cost is lower, update the frontier
                     frontier.change_priority(destId, fTemp)
                     if DEBUG:
-                        print("Location " + destId + " priority updated.")
-                        print("==Old costs==")
-                        print("\t g = ", gScore[destId])
-                        print("\t h =", hScore[destId])
-                        print("\t f = ", gScore[destId] + hScore[destId])
-                        print("==Updated Costs==")
-                        print("\t g = ", gTemp)
-                        print("\t h =", hTemp)
-                        print("\t f = ", fTemp)
+                        print("\t Location " + destId + " priority updated.")
+                        print("\t\t Old: g = " + str(gScore[destId]) + ", h = "
+                        + str(hScore[destId]) + ", f = " + str(gScore[destId] + hScore[destId]) )
+
+                        print("\t\t New: g = " + str(gTemp) + ", h = " + str(hTemp) + ", f = " + str(fTemp))
                     #store updated and h values for future lookup
                     gScore[destId] = gTemp
                     hScore[destId] = hTemp
 
                     #better path found; update cameFrom
                     cameFrom[destId] = currLocId
-
+            explored.append(currLocId)
 
     def printAdjList(self):
         print(self.adjList)
 
 
 def main():
-    fileName = input("Input filename (.txt): ")
+    #fileName = input("Input filename (.txt): ")
 
     network = RoadNetwork()
 
-    network.create_graph(fileName)
+    network.create_graph('all-memphis.txt')
 
-    locId1 = input("Enter one location ID: ")
-    locId2 = input("Enter another location ID: ")
+    #locId1 = str(input("Enter one location ID: "))
+    #locId2 = str(input("Enter another location ID: "))
     
+    locId1 = "203777568"
+    locId2 = "203948127"
+
     path = network.findBestPathByAStar(locId1, locId2)
     print(path)
 
