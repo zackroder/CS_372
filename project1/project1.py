@@ -81,7 +81,7 @@ class RoadNetwork:
 
     def reconstructPath(self, cameFrom, current, startId):
         path = []
-
+        path.append(current)
         while current != startId:
             current = cameFrom[current]
             path.insert(0, current)
@@ -134,7 +134,7 @@ class RoadNetwork:
 
                 #straight line distance is equal to length of the road, since we assume only line segment roads
                 gTemp = gScore[currLocId] + 60.0*(self.distBetweenTwoLocationsInMiles(currLocId, destId) / speedLimit)
-                hTemp = self.heuristicFunction(currLocId, goalId)
+                hTemp = self.heuristicFunction(destId, goalId)
                 fTemp = gTemp + hTemp
 
 
