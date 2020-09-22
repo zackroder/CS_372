@@ -1,7 +1,8 @@
 import math 
 from pqueue import PQueue
+import timeit
 
-DEBUG = True
+DEBUG = False
 
 #hashable dictionary to use in pqueue class
 class hDict(dict):
@@ -90,8 +91,7 @@ class RoadNetwork:
         return path 
     def findBestPathByAStar(self, startId, goalId):
         frontier = PQueue()
-        if DEBUG:
-            print("Routing from " + startId + " to " + goalId)
+        print("Routing from " + startId + " to " + goalId)
 
         #dictionaries to keep track of path costs as we proceed!
         #for locId n, cameFrom[n] is location Id immediately
@@ -123,6 +123,9 @@ class RoadNetwork:
             #we found it!
             if currLocId == goalId:
                 #reconstruct path and return it
+                
+                print("Total travel time is " + str(gScore[str(goalId)]) + " minutes.")
+                print("Number of nodes expanded: ") + str(len(explored))
                 return self.reconstructPath(cameFrom, currLocId, startId)
 
             #loop through accessible roads and evaluate each one then add to priority queue
@@ -168,26 +171,37 @@ class RoadNetwork:
                     cameFrom[destId] = currLocId
             explored.append(currLocId)
 
+
     def printAdjList(self):
         print(self.adjList)
 
 
 def main():
-    #fileName = input("Input filename (.txt): ")
+    fileName = input("Input filename (.txt): ")
 
     network = RoadNetwork()
 
-    network.create_graph('all-memphis.txt')
+    network.create_graph(fileName)
 
-    #locId1 = str(input("Enter one location ID: "))
-    #locId2 = str(input("Enter another location ID: "))
+    locId1 = str(input("Enter one location ID: "))
+    locId2 = str(input("Enter another location ID: "))
     
-    locId1 = "203777568"
-    locId2 = "203948127"
-
+    start = timeit.default_timer()
     path = network.findBestPathByAStar(locId1, locId2)
-    print(path)
-
+    stop = timeit.default_timer()
+    print("Route found in " + str(stop-start) + "seconds")
+    print("Path found is: ")
+    for i in range(len(path)):
+        loc = path[i]
+        if i == 0:
+            print(loc + " (start)")
+        else:
+            roadName = ""
+            for road in network.adjList[path[i-1]]["roads"]:
+                if road["destId"] == path[i]:
+                    roadName = road["name"]
+            
+            print(loc + " " + roadName)
 
 
 if __name__ == "__main__":
