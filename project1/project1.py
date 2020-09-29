@@ -1,3 +1,5 @@
+#DEPENDS ON pqueue.py
+
 import math 
 from pqueue import PQueue
 import timeit
@@ -125,7 +127,7 @@ class RoadNetwork:
                 #reconstruct path and return it
                 
                 print("Total travel time is " + str(gScore[str(goalId)]) + " minutes.")
-                print("Number of nodes expanded: ") + str(len(explored))
+                print("Number of nodes expanded: " + str(len(explored)))
                 return self.reconstructPath(cameFrom, currLocId, startId)
 
             #loop through accessible roads and evaluate each one then add to priority queue
