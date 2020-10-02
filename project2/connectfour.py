@@ -2,7 +2,7 @@ import numpy as np
 #class depicting a connect four board
 class ConnectFourBoard():
     #n is number of pieces in a row required to win
-    def __init__(self, columnCount, rowCount, n, player=1, openColumns=None, board = None):
+    def __init__(self, columnCount, rowCount, n, player=1, openColumns=None, board = None, movesExecuted = None):
         self.columnCount = columnCount
         self.rowCount = rowCount
         self.n = n
@@ -17,12 +17,20 @@ class ConnectFourBoard():
             self.openColumns = np.arange(0, columnCount)
         else:
             self.openColumns = openColumns #keeps track of columns that pieces can be dropped into
+        
         self.winningBoard = False
+
+        if movesExecuted is None:
+            self.movesExecuted = 0
+        else:
+            self.movesExecuted = movesExecuted
 
     def __hash__(self):
         return hash(self.board)
     def __eq__(self, obj):
         return np.arrayequal(self.board, obj.board)
+    def __neq__(self, obj):
+        return not(self == obj)
     def __str__(self):
         out = ""
         for row in self.board:
@@ -48,6 +56,8 @@ class ConnectFourBoard():
         return self.n
     def get_openColumns(self):
         return self.openColumns
+    def get_movesExecuted(self):
+        return self.movesExecuted
 
     #check a given row for n in a row
     def _checkHorizontal(self, rowNum):
@@ -122,7 +132,7 @@ class ConnectFourBoard():
     #meant to be called immediately after dropping a piece
     #given an index, determines whether newly dropped piece in this location is a win
     #returns true false-- is game state a win?
-    def _isWin(self, row, column):
+    def isWin(self, row, column):
         #check horizontal
         if self._checkVertical(column) or self._checkHorizontal(row) or self._checkDiagonals(row, column):
             self.winningBoard = True
@@ -153,13 +163,16 @@ class ConnectFourBoard():
     def player_move(self, columnNumber):
         if columnNumber in self.openColumns:
             rowNumber = self._drop_piece(columnNumber)
-
+            #switch player number
             if self.player == 1:
                 self.player = 2
             elif self.player == 2:
                 self.player = 1
+            
+            #increase numbed of moves executed
+            self.movesExecuted += 1
             #check to see if it's a winner
-            self._isWin(rowNumber, columnNumber)
+            self.isWin(rowNumber, columnNumber)
             if self.winningBoard:
                 return self.player
 
@@ -170,7 +183,14 @@ class ConnectFourBoard():
             print("Column " + str(columnNumber) + " cannot be played")
             return -1 
 
-
+    #returns boolean T/F whether board is a terminal state (win or draw)
+    def terminal_test(self):
+        #if it's a win or game board is full w/o win (draw)
+        if self.winningBoard or np.count_nonzero(self.board) == board.size :
+            return True
+        
+        else:
+            return False
 
 
 
