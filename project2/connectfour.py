@@ -2,13 +2,21 @@ import numpy as np
 #class depicting a connect four board
 class ConnectFourBoard():
     #n is number of pieces in a row required to win
-    def __init__(self, columnCount, rowCount, n):
+    def __init__(self, columnCount, rowCount, n, player=1, openColumns=None, board = None):
         self.columnCount = columnCount
         self.rowCount = rowCount
         self.n = n
-        self.board = np.zeros((rowCount, columnCount))
-        self.player = 1 #player 1 starts
-        self.openColumns = np.arange(0, columnCount) #keeps track of columns that pieces can be dropped into
+        if board is None:
+            self.board = np.zeros((rowCount, columnCount))
+        else:
+            self.board = board
+        
+        self.player = player #player 1 starts
+
+        if openColumns is None:
+            self.openColumns = np.arange(0, columnCount)
+        else:
+            self.openColumns = openColumns #keeps track of columns that pieces can be dropped into
         self.winningBoard = False
 
     def __hash__(self):
@@ -28,15 +36,28 @@ class ConnectFourBoard():
             out += '\n'
         return out
 
+    def get_board(self):
+        return self.board
+    def get_player(self):
+        return self.player
+    def get_columnCount(self):
+        return self.columnCount
+    def get_rowCount(self):
+        return self.rowCount
+    def get_n(self):
+        return self.n
+    def get_openColumns(self):
+        return self.openColumns
+
     #check a given row for n in a row
     def _checkHorizontal(self, rowNum):
         amountInARow = 0
         for loc in self.board[rowNum]:
-            if amountInARow == self.n:
-                print("winner found in horizontal")
-                return True
             if loc == self.player:
                 amountInARow += 1
+                if amountInARow == self.n:
+                    print("winner found in horizontal")
+                    return True
             else:
                 amountInARow = 0
         return False
@@ -45,12 +66,11 @@ class ConnectFourBoard():
     def _checkVertical(self, colNum):
         amountInARow = 0
         for row in self.board:
-            print(amountInARow)
-            if amountInARow == self.n:
-                print("winner found in vertical")
-                return True
             if row[colNum] == self.player:
                 amountInARow += 1
+                if amountInARow == self.n:
+                    print("winner found in vertical")
+                    return True
             else:
                 amountInARow = 0
         return False
@@ -133,21 +153,23 @@ class ConnectFourBoard():
     def player_move(self, columnNumber):
         if columnNumber in self.openColumns:
             rowNumber = self._drop_piece(columnNumber)
+
+            if self.player == 1:
+                self.player = 2
+            elif self.player == 2:
+                self.player = 1
             #check to see if it's a winner
             self._isWin(rowNumber, columnNumber)
             if self.winningBoard:
                 return self.player
 
+
             #if it's not a win, prepare for next round
-            if self.player == 1:
-                nextPlayer = 2
-            elif self.player == 2:
-                nextPlayer == 1
             return 0
         else:
             print("Column " + str(columnNumber) + " cannot be played")
             return -1 
-        #TODO: then we need to return next possible game boards
+
 
 
 
@@ -168,9 +190,3 @@ def main():
         
     
     
-
-
-    
-
-
-main()
