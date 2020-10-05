@@ -1,4 +1,7 @@
 import numpy as np
+from scipy.signal import convolve2d
+
+
 #class depicting a connect four board
 class ConnectFourBoard():
     #n is number of pieces in a row required to win
@@ -131,8 +134,9 @@ class ConnectFourBoard():
             i += 1
             j -= 1
         #trace along the antidiagonal
+        #print("starting antidiag at " + str(i) + " " + str(j))
         antidiag = []
-        while i > 0 and j < self.columnCount:
+        while i >= 0 and j < self.columnCount:
             antidiag.append(self.board[i][j])
             if amountInARow == self.n:
                 #print("Winner found in antidiagonal")
@@ -162,7 +166,8 @@ class ConnectFourBoard():
         else:
             self.winningBoard = False
         
-
+        #use convolution operation for win detection
+        
         
     #columns for player are numbered 0-(columnCount-1)
     #row index of where piece is placed
@@ -191,10 +196,13 @@ class ConnectFourBoard():
             
             #increase numbed of moves executed
             self.movesExecuted += 1
+
             #check to see if it's a winner
             self.isWin(rowNumber, columnNumber)
+
             if self.winningBoard:
                 return self.player
+            self.swap_player()
 
 
             #if it's not a win, prepare for next round

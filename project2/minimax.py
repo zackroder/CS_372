@@ -3,7 +3,9 @@ import numpy as np
 import copy
 import math
 from dataclasses import dataclass
+import sys
 
+sys.setrecursionlimit(1000000)
 @dataclass
 class MinimaxInfo:
     minimaxValue: int
@@ -14,22 +16,18 @@ class MinimaxInfo:
 def outputNextPossibleGameStates(board):
     #parameters for new board object
     openCols = board.get_openColumns()
-    currBoard = board.get_board()
-    colCount = board.get_columnCount()
-    rowCount = board.get_rowCount()
-    n = board.get_n()
-    player = (2 if board.get_player() == 1 else 1)
-
     #stores tuples of (boardObj, intOfColPieceDroppedInto)
     output = []
     #print(openCols)
     for col in openCols:
         tempObj = copy.deepcopy(board)
-        tempObj.swap_player()
         tempObj.player_move(col)
         #print(tempObj)
         #print("WIN: ", str(tempObj.winningBoard))
         output.append((tempObj, col))
+
+        #swap player
+
 
     #for board in output:
         #print(board[0].movesExecuted)
@@ -57,10 +55,10 @@ def _utility(gameState):
         return 0
     elif gameState.winningBoard:
         #print("theres a winner")
-        if player == 1.0:
+        if player == 2.0: #if player recieving winning game state is 1, player 2 is the winner!
             #print("player one winner")
             return int(10000 * rows * cols / moves)
-        elif player == 2.0:
+        elif player == 1.0:
             #print("player two winner")
             #print(int(-10000 * rows * cols / moves))
             return int(-10000 * rows * cols / moves)
@@ -116,14 +114,46 @@ def MiniMax(rows, columns, n):
     initialBoard = ConnectFourBoard(columns, rows, n)
     #print(initialBoard.n)
     _MiniMaxRecursive(initialBoard)
+    print("Size of transposition table: " + str(len(table)))
 
 
 def main():
-    print(MiniMax(4, 5, 3))
-    print("Size of transposition table: " + str(len(table)))
-    board1 = ConnectFourBoard(5, 4, 3)
-    board2 = ConnectFourBoard(5,4,3)
-    print(table[board1].minimaxValue)
+    rows = int(input("Enter rows: "))
+    cols = int(input("Enter columns: "))
+    n = int(input("Enter n-in-a-row: "))
+
+    MiniMax(rows,cols,n)
+    
+    print("Beginning game. ")
+
+    winning = False
+    board = ConnectFourBoard(cols, rows, n)
+    while not winning and not board.terminal_test():
+        if board.get_player() == 1.0:
+            print("Computer's turn")
+            print(board)
+            print("The best minimax value is: " + str(table[board].minimaxValue))
+            print("Best column to pick is " + str(table[board].bestMoveForState))
+            board.player_move(table[board].bestMoveForState)
+            winning = board.winningBoard
+            if winning:
+                print(board)
+                return "CPU wins"
+        elif board.get_player() == 2.0:
+            print("Humans's turn")
+            print(board)
+            print("The best minimax value is: " + str(table[board].minimaxValue))
+            print("Best column to pick is " + str(table[board].bestMoveForState))
+            col = int(input("pick a column: "))
+            board.player_move(col)
+            winning = board.winningBoard
+            if winning:
+                print(board)
+                return "Player wins"
+        
+        
+
+
 
 if __name__ == '__main__':
     main()
