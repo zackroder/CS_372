@@ -1,9 +1,12 @@
 from connectfour import ConnectFourBoard
+from connectfour import outputNextPossibleGameStates
+from connectfour import _utility
 import numpy as np
-import copy
 import math
 from dataclasses import dataclass
 import sys
+import time
+import cProfile
 
 sys.setrecursionlimit(1000000)
 @dataclass
@@ -12,58 +15,7 @@ class MinimaxInfo:
     bestMoveForState: int 
 
 
-#returns a list of ConnectFourBoard objects representing next possible moves
-def outputNextPossibleGameStates(board):
-    #parameters for new board object
-    openCols = board.get_openColumns()
-    #stores tuples of (boardObj, intOfColPieceDroppedInto)
-    output = []
-    #print(openCols)
-    for col in openCols:
-        tempObj = copy.deepcopy(board)
-        tempObj.player_move(col)
-        #print(tempObj)
-        #print("WIN: ", str(tempObj.winningBoard))
-        output.append((tempObj, col))
 
-        #swap player
-
-
-    #for board in output:
-        #print(board[0].movesExecuted)
-        #print(board)
-
-    return output
-
-
-#miniMax table to store values
-#keys are ConnectFourBoard objects; values are MM value and best column to play
-table = {}
-
-#calculates numerical worth of terminal state
-def _utility(gameState):
-    #print("utility called")
-    rows = gameState.get_rowCount()
-    cols = gameState.get_columnCount()
-    moves = gameState.get_movesExecuted()
-    player = gameState.get_player()
-    board = gameState.get_board()
-
-    #first, determine if it's a tie
-    if (np.count_nonzero(board) == board.size  and not gameState.winningBoard):
-        #print("TIE")
-        return 0
-    elif gameState.winningBoard:
-        #print("theres a winner")
-        if player == 1.0: 
-            #print("player one winner")
-            return int(10000 * rows * cols / moves)
-        elif player == 2.0:
-            #print("player two winner")
-            #print(int(-10000 * rows * cols / moves))
-            return int(-10000 * rows * cols / moves)
-    else:
-        return 0
 #returns next player given a gamestate
 def nextPlayer(gameState):
     return gameState.get_player()
@@ -71,6 +23,9 @@ def nextPlayer(gameState):
     #player corresponds to the player who receives the board in its current state
     #return (2.0 if player == 1.0 else 1.0)
 
+#miniMax table to store values
+#keys are ConnectFourBoard objects; values are MM value and best column to play
+table = {}
 #takes board object and does minimax
 def _MiniMaxRecursive(gameState):
     if gameState in table.keys():
@@ -123,11 +78,13 @@ def main():
     cols = int(input("Enter columns: "))
     n = int(input("Enter n-in-a-row: "))
 
+    start_time = time.time()
     MiniMax(rows,cols,n)
-    
+    end_time = time.time()
+    print("Total time to solve game tree: " + str(end_time-start_time))
     print("Beginning game. ")
 
-    winning = False
+    winning = False 
     board = ConnectFourBoard(cols, rows, n)
     while not winning and not board.terminal_test():
         if board.get_player() == 1.0:

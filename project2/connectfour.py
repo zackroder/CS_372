@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import convolve2d
+import copy
 
 
 #class depicting a connect four board
@@ -219,6 +219,62 @@ class ConnectFourBoard():
         
         else:
             return False
+
+#returns a list of ConnectFourBoard objects representing next possible moves
+def outputNextPossibleGameStates(board):
+    #parameters for new board object
+    openCols = board.get_openColumns()
+    boardArray = board.get_board()
+    player = board.get_player()
+    colCount = board.get_columnCount()
+    rowCount = board.get_rowCount()
+    n = board.get_n()
+    movesExecuted = board.get_movesExecuted()
+    #stores tuples of (boardObj, intOfColPieceDroppedInto)
+    output = []
+    #print(openCols)
+    for col in openCols:
+        #make a deep copy of board array
+        boardCopy = copy.deepcopy(boardArray)
+        tempObj = ConnectFourBoard(colCount, rowCount, n, player, openCols, boardCopy, movesExecuted)
+        tempObj.player_move(col)
+        #print(tempObj)
+        #print("WIN: ", str(tempObj.winningBoard))
+        output.append((tempObj, col))
+
+        #swap player
+
+
+    #for board in output:
+        #print(board[0].movesExecuted)
+        #print(board)
+
+    return output
+
+#calculates numerical worth of terminal state
+def _utility(gameState):
+    #print("utility called")
+    rows = gameState.get_rowCount()
+    cols = gameState.get_columnCount()
+    moves = gameState.get_movesExecuted()
+    player = gameState.get_player()
+    board = gameState.get_board()
+
+    #first, determine if it's a tie
+    if (np.count_nonzero(board) == board.size  and not gameState.winningBoard):
+        #print("TIE")
+        return 0
+    elif gameState.winningBoard:
+        #print("theres a winner")
+        if player == 1.0: 
+            #print("player one winner")
+            return int(10000 * rows * cols / moves)
+        elif player == 2.0:
+            #print("player two winner")
+            #print(int(-10000 * rows * cols / moves))
+            return int(-10000 * rows * cols / moves)
+    else:
+        return 0
 
 
 
