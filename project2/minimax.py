@@ -55,10 +55,10 @@ def _utility(gameState):
         return 0
     elif gameState.winningBoard:
         #print("theres a winner")
-        if player == 2.0: #if player recieving winning game state is 1, player 2 is the winner!
+        if player == 1.0: 
             #print("player one winner")
             return int(10000 * rows * cols / moves)
-        elif player == 1.0:
+        elif player == 2.0:
             #print("player two winner")
             #print(int(-10000 * rows * cols / moves))
             return int(-10000 * rows * cols / moves)
@@ -66,9 +66,10 @@ def _utility(gameState):
         return 0
 #returns next player given a gamestate
 def nextPlayer(gameState):
-    player = gameState.get_player()
-
-    return (2.0 if player == 1.0 else 1.0)
+    return gameState.get_player()
+    #the notion of "next player" under my connect 4 board object is confusing
+    #player corresponds to the player who receives the board in its current state
+    #return (2.0 if player == 1.0 else 1.0)
 
 #takes board object and does minimax
 def _MiniMaxRecursive(gameState):
