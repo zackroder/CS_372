@@ -1,7 +1,7 @@
 ##HEURISTIC INFO##
 
 My heuristic function assigns value to n-1 pieces in a row and n-2 pieces in a row.
-It looks just at the impact of the last dropped piece in the game state (the move that we are evaluating), and assigns the following values:
+It evaluates the whole board and assigns the following values:
     3 points for n-2 in-a-row (3 total)
     7 additional points for n-1 in-a-row (10 total)
 
