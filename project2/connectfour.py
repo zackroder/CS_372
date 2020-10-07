@@ -5,7 +5,7 @@ import copy
 #class depicting a connect four board
 class ConnectFourBoard():
     #n is number of pieces in a row required to win
-    def __init__(self, columnCount, rowCount, n, player=1.0, openColumns=None, board = None, movesExecuted = None):
+    def __init__(self, columnCount, rowCount, n, player=1.0, openColumns=None, board = None, movesExecuted = None, lastMove = None):
         self.columnCount = columnCount
         self.rowCount = rowCount
         self.n = n
@@ -27,6 +27,12 @@ class ConnectFourBoard():
             self.movesExecuted = 0
         else:
             self.movesExecuted = movesExecuted
+
+        #last move stores coordinates of last move (col, row)
+        if lastMove is None:
+            self.lastMove = (None, None)
+        else:
+            self.lastMove = lastMove
 
     def __hash__(self):
         return hash(self.board.tostring())
@@ -85,7 +91,6 @@ class ConnectFourBoard():
         amountInARow = 0
         col = []
         for row in self.board:
-            col.append(row[colNum])
             if row[colNum] == self.player:
                 amountInARow += 1
                 if amountInARow == self.n:
@@ -197,6 +202,9 @@ class ConnectFourBoard():
             #increase numbed of moves executed
             self.movesExecuted += 1
 
+            #update last move
+            self.lastMove = (columnNumber, rowNumber)
+
             #check to see if it's a winner
             self.isWin(rowNumber, columnNumber)
 
@@ -207,6 +215,8 @@ class ConnectFourBoard():
 
             #if it's not a win, prepare for next round
             return 0
+
+            
         else:
             #print("Column " + str(columnNumber) + " cannot be played")
             return -1 
@@ -277,20 +287,4 @@ def _utility(gameState):
         return 0
 
 
-
-def main():
-    gameBoard = ConnectFourBoard(7, 6, 4)
-    #print(gameBoard)
-
-    col = int(input("Enter a column to drop piece: "))
-    play = gameBoard.player_move(col)
-    #print(gameBoard)
-    while play == 0:
-        col = int(input("Enter a column to drop piece: "))
-        play = gameBoard.player_move(col)
-        if play == 1:
-            print("Win!")
-        print(gameBoard)
-        
-    
     

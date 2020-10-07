@@ -8,7 +8,6 @@ import sys
 import time
 import cProfile
 
-sys.setrecursionlimit(1000000)
 @dataclass
 class MinimaxInfo:
     minimaxValue: int
@@ -73,7 +72,7 @@ def MiniMax(rows, columns, n):
     print("Size of transposition table: " + str(len(table)))
 
 
-def main():
+def playWithMinimax():
     rows = int(input("Enter rows: "))
     cols = int(input("Enter columns: "))
     n = int(input("Enter n-in-a-row: "))
@@ -82,13 +81,16 @@ def main():
     MiniMax(rows,cols,n)
     end_time = time.time()
     print("Total time to solve game tree: " + str(end_time-start_time))
+    userNum = int(input("User: do you want to play first (1) or second (2)? "))
+    cpuNum = userNum % 2 + 1.0
+
     print("Beginning game. ")
 
     winning = False 
     board = ConnectFourBoard(cols, rows, n)
     while not winning and not board.terminal_test():
-        if board.get_player() == 1.0:
-            print("Computer's turn")
+        if board.get_player() == cpuNum:
+            print("\nComputer's turn")
             print(board)
             print("The best minimax value is: " + str(table[board].minimaxValue))
             print("Best column to pick is " + str(table[board].bestMoveForState))
@@ -96,9 +98,9 @@ def main():
             winning = board.winningBoard
             if winning:
                 print(board)
-                return "CPU wins"
-        elif board.get_player() == 2.0:
-            print("Humans's turn")
+                print("CPU wins!")
+        else:
+            print("\nHumans's turn")
             print(board)
             print("The best minimax value is: " + str(table[board].minimaxValue))
             print("Best column to pick is " + str(table[board].bestMoveForState))
@@ -107,11 +109,12 @@ def main():
             winning = board.winningBoard
             if winning:
                 print(board)
-                return "Player wins"
+                print("Player wins!")
+    
+    if not winning and board.terminal_test():
+        print('\n')
+        print(board)
+        print("Tie!")
+    
+    table.clear()
         
-        
-
-
-
-if __name__ == '__main__':
-    main()
