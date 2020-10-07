@@ -147,7 +147,7 @@ def heuristic2(state):
                         else:
                             amountInARow = 0
     
-    return (-totalScore if playerToCheck == 2.0 else totalScore)
+    return (-totalScore if playerToCheck == 1.0 else totalScore)
 
 
 def _AlphaBeta_with_heuristics_recursive(gameState, alpha, beta, depth, maxDepth):
