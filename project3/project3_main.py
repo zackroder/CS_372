@@ -35,8 +35,14 @@ def read_text_file(filename):
 def main():
     fileName = input("Enter file name: ")
     data = read_text_file(fileName)
+    ballroom = BallroomBayesNet(*data["size"], debug=False)
 
-    print(data)
+    for sensorData in data["sensor_readings"]:
+        print("Observation | M1: " + str(sensorData["m1"]) + ", M2: " + str(sensorData["m2"])
+        + ", Sound location: " + str(sensorData["s"]))
+        print("Monkey's predicted current location at time step " + str(sensorData["timestep"]))
+        ballroom.get_distrib_over_all_C(sensorData["m1"], sensorData["m2"], *sensorData["s"])
+    
 
 main()
 

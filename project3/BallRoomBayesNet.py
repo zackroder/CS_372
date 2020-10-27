@@ -25,8 +25,9 @@ class BallroomBayesNet():
             self._generate_m2_prob(*location)
             self._generate_S_prob(*location)
 
+        print("Initial distribution")
+        self._print_last_location_dist()
         if self.DEBUG:
-            self._print_last_location_dist()
             self._print_current_location_dist()
             self._print_m1_dist()
             self._print_m2_dist()
