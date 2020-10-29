@@ -44,6 +44,7 @@ def main():
         ballroom.get_distrib_over_all_C(sensorData["m1"], sensorData["m2"], *sensorData["s"])
     
 
-main()
+if __name__ == "__main__":
+    main()
 
     
