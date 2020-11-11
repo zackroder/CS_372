@@ -98,8 +98,8 @@ def test_email_set(training_data, email_set, spam_or_ham):
 
     #loop through emails in email set
     for email in email_set:
-        spam_log_prob = 0
-        ham_log_prob = 0
+        spam_log_prob = math.log(training_data["prob_spam"])
+        ham_log_prob = math.log(training_data["prob_ham"])
         #variable to keep track of number of words from
         #vocab that are true in this email
         true_words = 0
@@ -113,8 +113,8 @@ def test_email_set(training_data, email_set, spam_or_ham):
                 spam_log_prob += math.log(1 - prob_given_spam[word])
                 ham_log_prob += math.log(1 - prob_given_ham[word])
         #round log prob to 3 decimals
-        #spam_log_prob = round(spam_log_prob, 3)
-        #ham_log_prob = round(ham_log_prob, 3)
+        spam_log_prob = round(spam_log_prob, 3)
+        ham_log_prob = round(ham_log_prob, 3)
         #make prediction based on highest log-probability
         if spam_log_prob > ham_log_prob:
             h_map = "spam"
@@ -143,8 +143,10 @@ def main():
     training_data = train(spam_training_emails, ham_training_emails)
 
     spam_test_emails = parse_text_file('test-spam.txt')
-    
+    ham_test_emails = parse_text_file('test-ham.txt')
+
     test_email_set(training_data, spam_test_emails, "spam")
+    test_email_set(training_data, ham_test_emails, "ham")
 
 
 
