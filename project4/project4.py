@@ -38,6 +38,10 @@ def train(spam_emails, ham_emails):
     probability_spam = num_of_spam / (num_of_ham + num_of_spam)
     probability_ham = 1 - probability_spam
 
+    print("Prior probabilities: ")
+    print("\t Spam = " + str(probability_spam))
+    print("\t Ham = " + str(probability_ham))
+
     #count instances of words in spam, store in dict
     spam_word_count = {}
     for email in spam_emails:
@@ -60,7 +64,7 @@ def train(spam_emails, ham_emails):
 
     #set of ALL unique words
     word_set = set(list(spam_word_count.keys()) + list(ham_word_count.keys()))
-    print("Word count: " + str(len(word_set)))
+    print("Vocab size: " + str(len(word_set)))
 
     for word in word_set:
         #spam prob
@@ -133,20 +137,39 @@ def test_email_set(training_data, email_set, spam_or_ham):
                      + " features true " + str(spam_log_prob) + " " + str(ham_log_prob)
                      + " " + h_map + " " + right_or_wrong)
         print(output_str)
+        #tuple of data to compile success statistics
+    
+    return (correct_predictions, size_of_email_set)
 
     
 
 def main():
-    spam_training_emails = parse_text_file('train-spam.txt')
-    ham_training_emails = parse_text_file('train-ham.txt')
+    spam_train_file_name = input("Enter spam training file name: ")
+    ham_train_file_name = input("Enter ham training file name: ")
+
+    spam_training_emails = parse_text_file(spam_train_file_name)
+    ham_training_emails = parse_text_file(ham_train_file_name)
     
+    print("Training from " + spam_train_file_name + " and " + ham_train_file_name)
     training_data = train(spam_training_emails, ham_training_emails)
 
-    spam_test_emails = parse_text_file('test-spam.txt')
-    ham_test_emails = parse_text_file('test-ham.txt')
+    spam_test_file_name = input("Enter spam testing file name: ")
+    ham_test_file_name = input("Enter ham testing file name: ")
 
-    test_email_set(training_data, spam_test_emails, "spam")
-    test_email_set(training_data, ham_test_emails, "ham")
+    spam_test_emails = parse_text_file(spam_test_file_name)
+    ham_test_emails = parse_text_file(ham_test_file_name)
+    print("Testing from " + spam_test_file_name + " and " + ham_test_file_name)
+
+    spam_success = test_email_set(training_data, spam_test_emails, "spam")
+    ham_success = test_email_set(training_data, ham_test_emails, "ham")
+
+    success_rate = (spam_success[0] + ham_success[0]) / (spam_success[1] + ham_success[1])
+
+    print("Total success: " + 
+    str(spam_success[0] + ham_success[0]) + " out of " + 
+    str(spam_success[1] + ham_success[1]) + " emails correctly classified (success rate of " + 
+    str(success_rate * 100.0) + " %)."
+    )
 
 
 
