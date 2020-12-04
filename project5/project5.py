@@ -133,12 +133,10 @@ def print_q_table(Q):
 #plays a game (CPU vs AI) given a table of Q values
 def play_game(Q, pile0, pile1, pile2):
     whos_first = int(input("Who moves first, (1) User or (2) CPU? "))
-    if whos_first not in (1,2):
-        print("Two acceptable inputs: 1, 2")
-    #user goes first
-    elif whos_first == 1:
-        game = NimGame(pile0, pile1, pile2)
+    game = NimGame(pile0, pile1, pile2)
 
+    #user goes first
+    if whos_first == 1:
         game_over = False
         while not game_over:
             curr_state = game.return_game_state_tuple()
@@ -160,7 +158,7 @@ def play_game(Q, pile0, pile1, pile2):
     elif whos_first == 2:
         game_over = False
         while not game_over:
-            curr_state = game.return_game_state_tuple
+            curr_state = game.return_game_state_tuple()
             if game.player == 'B':
                 print("\nPlayer B's (user) turn; current game state is " + str(curr_state))
                 pile_num = int(input("Which pile? "))
